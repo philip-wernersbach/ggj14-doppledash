@@ -127,19 +127,37 @@ Grid =
                     when 2 then this.cascading_stairs_frame()
                     when 3 then this.both_stairs_frame()
                     when 4 then this.squares_frame()
+
 Crafty.c 'InfiniteGrid', {
     init: () ->
         return this
     
     infinite_grid_internal: () ->
-        if ((Grid.Generator.Frame.current_x_tile + 5) * Grid.TILE_INFO.TILE_LENGTH > Crafty.viewport.x )
+        if Grid.Generator.Frame.current_x_tile - (Math.abs(Crafty.viewport.x) / Grid.TILE_INFO.WIDTH) < 40 
             Grid.Generator.Frame.random_frame()
         
-        this.timeout(this.infinite_grid, 875)
+        this.timeout(this.infinite_grid_internal, 1)
         
     infinite_grid: () ->
         Grid.Generator.Frame.random_frame()
         this.timeout(this.infinite_grid_internal, 2000)
+    
+    infinite_grid_hard_internal: () ->
+        if Grid.Generator.Frame.current_x_tile - (Math.abs(Crafty.viewport.x) / Grid.TILE_INFO.WIDTH) < 40
+            if (this.next_hard_frame == 'squares')
+                Grid.Generator.Frame.squares_frame()
+                this.next_hard_frame = 'stairs'
+            else
+                Grid.Generator.Frame.stairs_frame()
+                this.next_hard_frame = 'squares'
+        
+        this.timeout(this.infinite_grid_hard_internal, 1)
+    
+    infinite_grid_hard: () ->
+        Grid.Generator.Frame.stairs_frame()
+        this.next_hard_frame = 'squares'
+        
+        this.timeout(this.infinite_grid_hard_internal, 2000)
 }
 
 Crafty.c 'ViewportScroll', {
@@ -152,14 +170,17 @@ Crafty.c 'ViewportScroll', {
         
         Crafty.viewport.scroll 'x', this.master_viewport_x 
         
-        last_viewport_x_tiles = this.last_viewport_x / Grid.TILE_INFO.TILE_LENGTH
-        master_viewport_x_tiles = this.master_viewport_x / Grid.TILE_INFO.TILE_LENGTH
+        #last_viewport_x_tiles = Math.abs(this.last_viewport_x / Grid.TILE_INFO.WIDTH)
+        #master_viewport_x_tiles = Math.abs(this.master_viewport_x / Grid.TILE_INFO.WIDTH)
         
-        for i in [0...Grid.HEIGHT_IN_TILES]
-            for j in [last_viewport_x_tiles...master_viewport_x_tiles]
-                if Grid.tiles[i][j]
-                    Grid.tiles[i][j].destroy()
-                    Grid.tiles[i][j] = undefined
+        #console.log('last_viewport_x_tiles: ' +  last_viewport_x_tiles)
+        #console.log('master_viewport_x_tiles: ' +  master_viewport_x_tiles)
+        
+        #for i in [0...Grid.HEIGHT_IN_TILES]
+        #    for j in [last_viewport_x_tiles..master_viewport_x_tiles]
+        #        if Grid.tiles[i][j]
+        #            Grid.tiles[i][j].destroy()
+        #            Grid.tiles[i][j] = undefined
         
         this.timeout(this.scroll_right, 1)
     
@@ -215,6 +236,11 @@ Grid.init(15, 40)
 Crafty.init(Grid.WIDTH_IN_PIXELS, Grid.HEIGHT_IN_PIXELS).canvas.init()
 Crafty.box2D.init(0, 20, 34, true)
 
+defect = ''
+random_num = Math.floor((Math.random()*3)+1)
+switch random_num
+    when 1 then defect = 'hard'
+
 # Init sprites
 Crafty.sprite 32, 'images/PersonTemplate.png', {
     player_sprite: [0,0]
@@ -256,5 +282,11 @@ player.box2d {
 }
 
 player.playerControls()
-player.infinite_grid()
+
+if defect == 'hard'
+    document.getElementById('defects').innerHTML += '<li>Perfectionist - You take the hard way.</li>'
+    player.infinite_grid_hard()
+else
+    player.infinite_grid()
+    
 player.viewport_scroll(Grid.HIGHT_IN_TILES, 20)
