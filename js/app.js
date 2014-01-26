@@ -140,26 +140,61 @@ Grid = {
       }
       return _results;
     },
+    down_platform: function(x_tile) {
+      var i, _i, _j, _ref, _results;
+      for (i = _i = 1, _ref = Grid.HEIGHT_IN_TILES + 1; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
+        if (i !== 2 && i !== 3 && i !== 4) {
+          Grid.put_tile(Grid.generate_platform(), Grid.HEIGHT_IN_TILES - i, x_tile);
+        }
+      }
+      _results = [];
+      for (i = _j = 0; _j <= 2; i = ++_j) {
+        _results.push(Grid.put_tile(Grid.generate_yellow_platform(), Grid.HEIGHT_IN_TILES - 2, x_tile + i));
+      }
+      return _results;
+    },
+    up_platform: function(x_tile, top_gap) {
+      var i, _i, _j, _ref;
+      if (top_gap < 2) {
+        top_gap = 2;
+      }
+      for (i = _i = 3, _ref = Grid.HEIGHT_IN_TILES - 1; 3 <= _ref ? _i <= _ref : _i >= _ref; i = 3 <= _ref ? ++_i : --_i) {
+        if (i > top_gap) {
+          Grid.put_tile(Grid.generate_yellow_platform(), i, x_tile + 1);
+        }
+      }
+      for (i = _j = 0; _j <= 2; i = ++_j) {
+        Grid.put_tile(Grid.generate_yellow_platform(), top_gap + 2, x_tile + i);
+      }
+      return Grid.put_tile(Grid.generate_platform(), top_gap + 2, x_tile + 1);
+    },
     Frame: {
       init: function() {
+        this.last_frame = '';
+        this.last_frame_lowest_y = 0;
         return this.current_x_tile = 1;
       },
       stairs_frame: function() {
         var random_num;
         random_num = Math.floor((Math.random() * 14) + 1);
         Grid.Generator.stairs(random_num, Grid.HEIGHT_IN_TILES - 1, this.current_x_tile);
-        return this.current_x_tile += (random_num - 2) * 3 - 2;
+        this.last_frame_lowest_y = Grid.HEIGHT_IN_TILES - 1 - random_num;
+        this.current_x_tile += (random_num - 2) * 3 - 2;
+        return this.last_frame = 'stairs';
       },
       cascading_stairs_frame: function() {
         Grid.Generator.cascading_stairs(Grid.HEIGHT_IN_TILES - 5, 20, Grid.HEIGHT_IN_TILES - 1, this.current_x_tile);
-        return this.current_x_tile += 18;
+        this.current_x_tile += 18;
+        this.last_frame = 'stairs';
+        return this.last_frame_lowest_y += Grid.HEIGHT_IN_TILES - 1 - 5;
       },
       both_stairs_frame: function() {
         var random_num;
         random_num = Math.floor((Math.random() * 16) + 1);
         this.cascading_stairs_frame();
         this.current_x_tile -= random_num;
-        return this.stairs_frame();
+        this.stairs_frame();
+        return this.last_frame = '';
       },
       squares_frame: function() {
         var biggest_random_x, i, random_num, random_x, random_y, _i;
@@ -178,11 +213,24 @@ Grid = {
             }
           }
         }
-        return this.current_x_tile += biggest_random_x;
+        this.current_x_tile += biggest_random_x;
+        return this.last_frame = '';
+      },
+      down_platform_frame: function() {
+        Grid.Generator.down_platform(this.current_x_tile + 2);
+        this.current_x_tile += 6;
+        return this.last_frame = '';
+      },
+      up_platform_frame: function() {
+        if (this.last_frame === 'stairs') {
+          Grid.Generator.up_platform(this.current_x_tile + 2, this.last_frame_lowest_y - 2);
+          this.current_x_tile += 5;
+          return this.last_frame = '';
+        }
       },
       random_frame: function() {
         var random_num;
-        random_num = Math.floor((Math.random() * 4) + 1);
+        random_num = Math.floor((Math.random() * 6) + 1);
         switch (random_num) {
           case 1:
             return this.stairs_frame();
@@ -192,6 +240,10 @@ Grid = {
             return this.both_stairs_frame();
           case 4:
             return this.squares_frame();
+          case 5:
+            return this.down_platform_frame();
+          case 6:
+            return this.up_platform_frame();
         }
       }
     }
@@ -218,8 +270,11 @@ Crafty.c('InfiniteGrid', {
     if (Grid.Generator.Frame.current_x_tile - (Math.abs(Crafty.viewport.x) / Grid.TILE_INFO.WIDTH) < 40) {
       if (this.next_hard_frame === 'squares') {
         Grid.Generator.Frame.squares_frame();
+        this.next_hard_frame = 'down_platform';
+      } else if (this.next_hard_frame === 'down_platform') {
+        Grid.Generator.Frame.down_platform_frame();
         this.next_hard_frame = 'stairs';
-      } else {
+      } else if (this.next_hard_frame === 'stairs') {
         Grid.Generator.Frame.stairs_frame();
         this.next_hard_frame = 'squares';
       }
@@ -229,6 +284,7 @@ Crafty.c('InfiniteGrid', {
   infinite_grid_hard: function() {
     Grid.Generator.Frame.stairs_frame();
     Grid.Generator.Frame.squares_frame();
+    Grid.Generator.Frame.down_platform_frame();
     Grid.Generator.Frame.stairs_frame();
     this.next_hard_frame = 'squares';
     return this.timeout(this.infinite_grid_hard_internal, 2000);
@@ -389,8 +445,8 @@ if (defect_size === 'small') {
 }
 
 player = Crafty.e('2D, Canvas, Box2D, Player, PlayerControls, ViewportScroll, InfiniteGrid, player_sprite').attr({
-  w: player_w,
-  h: player_h,
+  w: player_w * 0.88,
+  h: player_h * 0.88,
   x: 0,
   y: Grid.HEIGHT_IN_PIXELS - 3 * Grid.TILE_INFO.HEIGHT
 });
@@ -420,5 +476,9 @@ if (defect === 'hard') {
 } else {
   player.infinite_grid();
 }
+
+Grid.put_tile(Grid.generate_platform(), Grid.HEIGHT_IN_TILES - 2, 10);
+
+Grid.put_tile(Grid.generate_platform(), Grid.HEIGHT_IN_TILES - 2, 12);
 
 player.viewport_scroll(Grid.HIGHT_IN_TILES, 20);
