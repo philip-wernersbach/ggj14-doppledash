@@ -27,7 +27,14 @@ Grid =
         return this.generate_sprite_tile('default_platform_sprite')
     
     generate_yellow_platform: () ->
-        return this.generate_sprite_tile('yellow_platform_sprite')
+        if !player.colorblind
+            return this.generate_sprite_tile('yellow_platform_sprite')
+        else
+            random_num = Math.floor((Math.random()*5)+1)
+            if random_num == 1 or random_num == 2
+                return this.generate_sprite_tile('green_platform_sprite')
+            else
+                return this.generate_sprite_tile('yellow_platform_sprite')
     
     generate_color_tile: (color) ->
         tile = Crafty.e('2D, Canvas, Color, Box2D, Block').color(color).attr({
@@ -140,6 +147,8 @@ Crafty.c 'InfiniteGrid', {
         
     infinite_grid: () ->
         Grid.Generator.Frame.random_frame()
+        Grid.Generator.Frame.random_frame()
+        Grid.Generator.Frame.random_frame()
         this.timeout(this.infinite_grid_internal, 2000)
     
     infinite_grid_hard_internal: () ->
@@ -154,6 +163,8 @@ Crafty.c 'InfiniteGrid', {
         this.timeout(this.infinite_grid_hard_internal, 1)
     
     infinite_grid_hard: () ->
+        Grid.Generator.Frame.stairs_frame()
+        Grid.Generator.Frame.squares_frame()
         Grid.Generator.Frame.stairs_frame()
         this.next_hard_frame = 'squares'
         
@@ -221,6 +232,10 @@ Crafty.c 'PlayerControls', {
             if this.isDown 'A'
                 desired_vel_x -= 3;
         
+            if this.sick == true
+                desired_vel_y /= 1.3
+                desired_vel_x /= 1.25
+        
             if desired_vel_x != 0
                 vel_change_x = desired_vel_x - vel.x
         
@@ -237,23 +252,51 @@ Crafty.init(Grid.WIDTH_IN_PIXELS, Grid.HEIGHT_IN_PIXELS).canvas.init()
 Crafty.box2D.init(0, 20, 34, true)
 
 defect = ''
-random_num = Math.floor((Math.random()*3)+1)
+random_num = Math.floor((Math.random()*5)+1)
 switch random_num
     when 1 then defect = 'hard'
+    when 2 then defect = 'colorblind'
+    when 3 then defect = 'sick'
+
+defect_size = ''
+
+# The Perfectionist is perfect, and can't have a size defect.
+if defect != 'hard'
+    random_num = Math.floor((Math.random()*5)+1)
+    switch random_num
+        when 1 then defect_size = 'small'
+        when 2 then defect_size = 'flat'
+        when 3 then defect_size = 'skinny'
 
 # Init sprites
-Crafty.sprite 32, 'images/PersonTemplate.png', {
-    player_sprite: [0,0]
-}
+
+if defect == 'colorblind'
+    Crafty.sprite 32, 'images/Noeyes2.png', {
+        player_sprite: [0,0]
+    }
+    
+    Crafty.sprite 32, 'images/techblocksgreen.png', {
+        green_platform_sprite: [0,0]
+    }
+else if defect == 'sick'
+    Crafty.sprite 32, 'images/Sicky4.png', {
+        player_sprite: [0,0]
+    }
+else
+    Crafty.sprite 32, 'images/PersonTemplate.png', {
+        player_sprite: [0,0]
+    }
+
 
 Crafty.sprite 32, 'images/techblockblue.png', {
     default_platform_sprite: [0,0]
     blue_platform_sprite: [0,0]
 }
 
-Crafty.sprite 32, 'images/techblocksyellow.png', {
-    yellow_platform_sprite: [0,0]
-}
+if defect != 'colorblind'
+    Crafty.sprite 32, 'images/techblocksyellow.png', {
+        yellow_platform_sprite: [0,0]
+    }
 
 Crafty.background 'url("images/background.png")'
 
@@ -268,9 +311,23 @@ for i in [0...Grid.WIDTH_IN_TILES]
 
 Grid.Generator.Frame.init()
 
+player_w = Grid.TILE_INFO.WIDTH
+player_h = Grid.TILE_INFO.HEIGHT
+if defect_size == 'small'
+    player_w /= 2
+    player_h /= 2
+    document.getElementById('defects').innerHTML += '<li>Stunted Growth - You are small.</li>'
+else if defect_size == 'flat'
+    player_w *= 2
+    player_h /= 2
+    document.getElementById('defects').innerHTML += '<li>It\'s a Sack! - You got pancaked.</li>'
+else if defect_size == 'skinny'
+    player_w /= 2
+    document.getElementById('defects').innerHTML += '<li>Picky Eater - You are skinny.</li>'
+
 player = Crafty.e('2D, Canvas, Box2D, Player, PlayerControls, ViewportScroll, InfiniteGrid, player_sprite').attr({
-        w: Grid.TILE_INFO.WIDTH
-        h: Grid.TILE_INFO.HEIGHT
+        w: player_w
+        h: player_h
         
         x: 0
         y: Grid.HEIGHT_IN_PIXELS - 3 * Grid.TILE_INFO.HEIGHT
@@ -282,6 +339,15 @@ player.box2d {
 }
 
 player.playerControls()
+
+player.sick = false
+player.colorblind = false
+if defect == 'colorblind'
+    document.getElementById('defects').innerHTML += '<li>Color Blind - You can\'t see yellow blocks.</li>'
+    player.colorblind = true
+else if defect == 'sick'
+    document.getElementById('defects').innerHTML += '<li>Feeble - You have a hard time moving.</li>'
+    player.sick = true
 
 if defect == 'hard'
     document.getElementById('defects').innerHTML += '<li>Perfectionist - You take the hard way.</li>'
