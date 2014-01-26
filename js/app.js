@@ -120,9 +120,9 @@ Grid = {
       _results = [];
       for (i = _i = 0; 0 <= number ? _i < number : _i > number; i = 0 <= number ? ++_i : --_i) {
         _results.push((function() {
-          var _j, _ref, _results1;
+          var _j, _ref, _ref1, _results1;
           _results1 = [];
-          for (j = _j = 0, _ref = length - (i * 2); 0 <= _ref ? _j < _ref : _j > _ref; j = 0 <= _ref ? ++_j : --_j) {
+          for (j = _j = _ref = (length - (i * 2)) - 2, _ref1 = length - (i * 2); _ref <= _ref1 ? _j < _ref1 : _j > _ref1; j = _ref <= _ref1 ? ++_j : --_j) {
             _results1.push(Grid.put_tile(Grid.generate_platform(), y_tile - i, x_tile + length - j - 3));
           }
           return _results1;

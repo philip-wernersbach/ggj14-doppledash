@@ -75,7 +75,7 @@ Grid =
         
         cascading_stairs: (number, length, y_tile, x_tile) ->
             for i in [0...number]
-                for j in [0...(length - (i * 2))]
+                for j in [((length - (i * 2)) - 2)...(length - (i * 2))]
                     Grid.put_tile Grid.generate_platform(), y_tile - i, x_tile + length - j - 3
         
         Frame:
