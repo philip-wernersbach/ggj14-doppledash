@@ -394,7 +394,7 @@ if (defect === 'colorblind') {
     green_platform_sprite: [0, 0]
   });
 } else if (defect === 'sick') {
-  Crafty.sprite(32, 'images/Sicky4.png', {
+  Crafty.sprite(32, 'images/sicky4.png', {
     player_sprite: [0, 0]
   });
 } else {
