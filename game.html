@@ -1,13 +1,28 @@
 <html>
   <head>
       <style>
-          #cr-stage { 
+          #cr-stage, #defects_container { 
               border: 2px solid;
+          }
+          
+          #cr-stage {
+              width: 640px;
+              height: 480px;
+          }
+          
+          #defects_container {
+              display: inline-block;
+              padding: 10px;
           }
       </style>
   </head>
   <body>
-    <div>
+    <div id="cr-stage"></div>
+    
+    <br />
+    <br />
+    
+    <div id="defects_container">
         <div>Defects:</div>
         <ul id="defects">
             <li>Kamikaze - Jump when already in the air to dive into the ground.</li>
