@@ -334,6 +334,9 @@ Crafty.c('PlayerControls', {
       if (this.isDown('A')) {
         desired_vel_x -= 3;
       }
+      if (this.isDown('R')) {
+        location.reload(true);
+      }
       if (this.sick === true) {
         desired_vel_y /= 1.3;
         desired_vel_x /= 1.25;
