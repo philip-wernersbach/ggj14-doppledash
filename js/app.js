@@ -196,7 +196,7 @@ Crafty.c('InfiniteGrid', {
     if ((Grid.Generator.Frame.current_x_tile + 5) * Grid.TILE_INFO.TILE_LENGTH > Crafty.viewport.x) {
       Grid.Generator.Frame.random_frame();
     }
-    return this.timeout(this.infinite_grid, 1750);
+    return this.timeout(this.infinite_grid, 875);
   },
   infinite_grid: function() {
     Grid.Generator.Frame.random_frame();

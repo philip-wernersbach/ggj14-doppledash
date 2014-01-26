@@ -135,7 +135,7 @@ Crafty.c 'InfiniteGrid', {
         if ((Grid.Generator.Frame.current_x_tile + 5) * Grid.TILE_INFO.TILE_LENGTH > Crafty.viewport.x )
             Grid.Generator.Frame.random_frame()
         
-        this.timeout(this.infinite_grid, 1750)
+        this.timeout(this.infinite_grid, 875)
         
     infinite_grid: () ->
         Grid.Generator.Frame.random_frame()
@@ -241,9 +241,6 @@ for i in [0...Grid.WIDTH_IN_TILES]
     Grid.put_tile Grid.generate_platform(), Grid.HEIGHT_IN_TILES-1, i
 
 Grid.Generator.Frame.init()
-#Grid.Generator.Frame.cascading_stairs_frame()
-#Grid.Generator.Frame.stairs_frame()
-#Grid.Generator.Frame.cascading_stairs_frame()
 
 player = Crafty.e('2D, Canvas, Box2D, Player, PlayerControls, ViewportScroll, InfiniteGrid, player_sprite').attr({
         w: Grid.TILE_INFO.WIDTH
