@@ -242,8 +242,6 @@ Grid = {
             return this.squares_frame();
           case 5:
             return this.down_platform_frame();
-          case 6:
-            return this.up_platform_frame();
         }
       }
     }

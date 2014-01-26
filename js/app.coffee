@@ -180,7 +180,7 @@ Grid =
                     when 3 then this.both_stairs_frame()
                     when 4 then this.squares_frame()
                     when 5 then this.down_platform_frame()
-                    when 6 then this.up_platform_frame()
+                    #when 6 then this.up_platform_frame()
 
 Crafty.c 'InfiniteGrid', {
     init: () ->
