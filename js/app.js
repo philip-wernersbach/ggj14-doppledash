@@ -135,8 +135,10 @@ Grid = {
         return this.current_x_tile = 1;
       },
       stairs_frame: function() {
-        Grid.Generator.stairs(15, Grid.HEIGHT_IN_TILES - 1, this.current_x_tile);
-        return this.current_x_tile += 15 * 3 - 8;
+        var random_num;
+        random_num = Math.floor((Math.random() * 14) + 1);
+        Grid.Generator.stairs(random_num, Grid.HEIGHT_IN_TILES - 1, this.current_x_tile);
+        return this.current_x_tile += (random_num - 2) * 3 - 2;
       },
       cascading_stairs_frame: function() {
         Grid.Generator.cascading_stairs(Grid.HEIGHT_IN_TILES - 5, 20, Grid.HEIGHT_IN_TILES - 1, this.current_x_tile);
@@ -147,7 +149,7 @@ Grid = {
         random_num = Math.floor((Math.random() * 16) + 1);
         this.cascading_stairs_frame();
         this.current_x_tile -= random_num;
-        return this.cascading_stairs_frame();
+        return this.stairs_frame();
       },
       squares_frame: function() {
         var biggest_random_x, i, random_num, random_x, random_y, _i;
