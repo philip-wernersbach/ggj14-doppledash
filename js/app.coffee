@@ -249,6 +249,9 @@ Crafty.c 'ViewportScroll', {
     viewport_scroll: (tile_height, tile_width) ->
         Crafty.viewport.init Grid.TILE_INFO.WIDTH * tile_width, Grid.TILE_INFO.HEIGHT * tile_height
         
+        document.getElementById('cr-stage').style.width = '640px'
+        document.getElementById('cr-stage').style.height = '480px'
+        
         this.last_viewport_x = 0
         this.master_viewport_x = Crafty.viewport.x 
         
@@ -394,7 +397,7 @@ player.playerControls()
 player.sick = false
 player.colorblind = false
 if defect == 'colorblind'
-    document.getElementById('defects').innerHTML += '<li>Color Blind - You can\'t see yellow blocks.</li>'
+    document.getElementById('defects').innerHTML += '<li>Color Blind - You can\'t see yellow blocks. (HINT: The green blocks mark where yellow blocks are.)</li>'
     player.colorblind = true
 else if defect == 'sick'
     document.getElementById('defects').innerHTML += '<li>Feeble - You have a hard time moving.</li>'
